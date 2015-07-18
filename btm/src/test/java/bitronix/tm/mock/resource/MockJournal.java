@@ -15,19 +15,23 @@
  */
 package bitronix.tm.mock.resource;
 
+import bitronix.tm.TransactionManagerServices;
 import bitronix.tm.journal.Journal;
 import bitronix.tm.journal.JournalRecord;
 import bitronix.tm.journal.TransactionLogRecord;
 import bitronix.tm.mock.events.EventRecorder;
 import bitronix.tm.mock.events.JournalLogEvent;
+import bitronix.tm.spi.DefaultBitronixContext;
 import bitronix.tm.utils.Uid;
 
 import javax.transaction.Status;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  *
@@ -72,5 +76,18 @@ public class MockJournal implements Journal {
     }
 
     public void shutdown() {
+    }
+
+    public static void setAsJournal() throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
+        Field field = TransactionManagerServices.class.getDeclaredField("context");
+        field.setAccessible(true);
+        @SuppressWarnings("unchecked")
+        DefaultBitronixContext context = (DefaultBitronixContext) field.get(TransactionManagerServices.class);
+
+        Field journalField = DefaultBitronixContext.class.getDeclaredField("journalRef");
+        journalField.setAccessible(true);
+        AtomicReference<Journal> journalRef = (AtomicReference<Journal>) journalField.get(context);
+        journalRef.set(new MockJournal());
+
     }
 }

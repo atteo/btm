@@ -18,7 +18,6 @@ package bitronix.tm.mock;
 import bitronix.tm.BitronixTransactionManager;
 import bitronix.tm.TransactionManagerServices;
 import bitronix.tm.internal.BitronixXAException;
-import bitronix.tm.journal.Journal;
 import bitronix.tm.mock.events.EventRecorder;
 import bitronix.tm.mock.events.JournalLogEvent;
 import bitronix.tm.mock.events.XAResourceEndEvent;
@@ -39,11 +38,9 @@ import javax.transaction.RollbackException;
 import javax.transaction.Status;
 import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
-import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 
 public class DelistmentTest extends TestCase {
@@ -64,11 +61,7 @@ public class DelistmentTest extends TestCase {
         }
 
         // change disk journal into mock journal
-        Field field = TransactionManagerServices.class.getDeclaredField("journalRef");
-        field.setAccessible(true);
-        @SuppressWarnings("unchecked")
-        AtomicReference<Journal> journalRef = (AtomicReference<Journal>) field.get(TransactionManagerServices.class);
-        journalRef.set(new MockJournal());
+        MockJournal.setAsJournal();
 
         poolingDataSource1 = new PoolingDataSource();
         poolingDataSource1.setClassName(MockitoXADataSource.class.getName());

@@ -16,7 +16,6 @@
 package bitronix.tm.mock;
 
 import bitronix.tm.TransactionManagerServices;
-import bitronix.tm.journal.Journal;
 import bitronix.tm.mock.events.ConnectionDequeuedEvent;
 import bitronix.tm.mock.events.ConnectionQueuedEvent;
 import bitronix.tm.mock.events.EventRecorder;
@@ -34,7 +33,6 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.util.Iterator;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  *
@@ -79,11 +77,7 @@ public abstract class AbstractMockJdbcTest extends TestCase {
         poolingDataSource2.init();
 
         // change disk journal into mock journal
-        Field field = TransactionManagerServices.class.getDeclaredField("journalRef");
-        field.setAccessible(true);
-        @SuppressWarnings("unchecked")
-        AtomicReference<Journal> journalRef = (AtomicReference<Journal>) field.get(TransactionManagerServices.class);
-        journalRef.set(new MockJournal());
+        MockJournal.setAsJournal();
 
         // change connection pools into mock pools
         XAPool<JdbcPooledConnection, JdbcPooledConnection> p1 = getPool(this.poolingDataSource1);

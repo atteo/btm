@@ -43,14 +43,12 @@ import javax.transaction.Status;
 import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
 import java.io.File;
-import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  *
@@ -307,11 +305,7 @@ public class RecovererTest extends TestCase {
     volatile boolean listenerExecuted = false;
     public void testBackgroundRecovererSkippingInFlightTransactions() throws Exception {
         // change disk journal into mock journal
-        Field field = TransactionManagerServices.class.getDeclaredField("journalRef");
-        field.setAccessible(true);
-        @SuppressWarnings("unchecked")
-        AtomicReference<Journal> journalRef = (AtomicReference<Journal>) field.get(TransactionManagerServices.class);
-        journalRef.set(new MockJournal());
+        MockJournal.setAsJournal();
 
         pds.setMaxPoolSize(2);
         BitronixTransactionManager btm = TransactionManagerServices.getTransactionManager();
